@@ -32,12 +32,12 @@ RUN set -x \
 COPY entry.sh /entry.sh
 ENTRYPOINT ["/entry.sh"]
 CMD ["/bin/sh"]
-COPY boto.tmpl /home/user/.boto.tmpl
+COPY boto.tmpl /.boto.tmpl
 
 # Stop running as root
 RUN set -x \
   && adduser -u 1000 -D user \
-  && chown -R user:user /home/user \
+  && adduser -u 1001 -D jenkins \
   ;
 USER user
 

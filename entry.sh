@@ -2,7 +2,8 @@
 
 set -xe
 
-gomplate < /home/user/.boto.tmpl > /home/user/.boto
+gomplate < /.boto.tmpl > $HOME/.boto
+chmod 600 $HOME/.boto
 
 unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SECURITY_TOKEN AWS_SESSION_TOKEN
 
