@@ -4,24 +4,20 @@
 # "gs_access_key_id") or remove important markers (like the "[Credentials]" and
 # "[Boto]" section delimiters).
 #
-# This file was created by gsutil version 4.28 at 2017-12-14 02:40:54.
+# This file was created by gsutil version 4.30 at 2018-04-15 15:52:11.
 #
 # You can create additional configuration files by running
 # gsutil config [options] [-o <config-file>]
 
 
 [Credentials]
-{{ if getenv "GOOGLE_APPLICATION_CREDENTIALS" -}}
-gs_service_key_file = {{ getenv "GOOGLE_APPLICATION_CREDENTIALS" }}
-{{ end -}}
 
-# To add Google OAuth2 credentials ("gs://" URIs), edit and uncomment the
-# following line:
-#gs_oauth2_refresh_token = <your OAuth2 refresh token>
-
-# google credentials ("gs://" URIs):
-#gs_access_key_id = 
-#gs_secret_access_key = 
+# Google OAuth2 credentials are managed by the Cloud SDK and
+# do not need to be present in this file.
+# To add HMAC google credentials for "gs://" URIs, edit and uncomment the
+# following two lines:
+#gs_access_key_id = <your google access key ID>
+#gs_secret_access_key = <your google secret access key>
 # The ability to specify an alternate storage host and port
 # is primarily for cloud storage service developers.
 # Setting a non-default gs_host only works if prefer_api=xml.
@@ -34,16 +30,7 @@ gs_service_key_file = {{ getenv "GOOGLE_APPLICATION_CREDENTIALS" }}
 # To add HMAC aws credentials for "s3://" URIs, edit and uncomment the
 # following two lines:
 #aws_access_key_id = <your aws access key ID>
-{{ if getenv "AWS_ACCESS_KEY_ID" -}}
-aws_access_key_id = {{ getenv "AWS_ACCESS_KEY_ID" }}
-{{ end -}}
 #aws_secret_access_key = <your aws secret access key>
-{{ if getenv "AWS_SECRET_ACCESS_KEY" -}}
-aws_secret_access_key = {{ getenv "AWS_SECRET_ACCESS_KEY" }}
-{{ end -}}
-{{ if getenv "AWS_SESSION_TOKEN" -}}
-aws_security_token = {{ getenv "AWS_SESSION_TOKEN" }}
-{{ end -}}
 # The ability to specify an alternate storage host and port
 # is primarily for cloud storage service developers.
 # Setting a non-default gs_host only works if prefer_api=xml.
@@ -213,18 +200,32 @@ https_validate_certificates = True
 # Note: Parallel composite uploads should not be used with NEARLINE or COLDLINE
 # storage class buckets, as doing this incurs an early deletion charge for
 # each component object.
+#
+# Note: Parallel composite uploads are not enabled with Cloud KMS encrypted
+# objects as a source or destination, as composition with KMS objects is not yet
+# supported.
+
 #parallel_composite_upload_threshold = 0
 #parallel_composite_upload_component_size = 50M
 
 # 'sliced_object_download_threshold' and
 # 'sliced_object_download_component_size' have analogous functionality to
 # their respective parallel_composite_upload config values.
-# 'sliced_object_download_max_components' specifies the maximum number of 
+# 'sliced_object_download_max_components' specifies the maximum number of
 # slices to be used when performing a sliced object download. It is not
 # restricted by MAX_COMPONENT_COUNT.
 #sliced_object_download_threshold = 0
 #sliced_object_download_component_size = 50M
 #sliced_object_download_max_components = 4
+
+# Compressed transport encoded uploads buffer chunks of compressed data. When
+# running a composite upload and/or many uploads in parallel, compression may
+# consume more memory than available. This setting restricts the number of
+# compressed transport encoded uploads running in parallel such that they
+# don't consume more memory than set here. This is 2GiB by default.
+# Values can be provided either in bytes or as human-readable values
+# (e.g., "2G" to represent 2 gibibytes)
+#max_upload_compression_buffer_size = 2G
 
 # 'task_estimation_threshold' controls how many files or objects gsutil
 # processes before it attempts to estimate the total work that will be
@@ -234,8 +235,8 @@ https_validate_certificates = True
 # listing calls; to disable it entirely, set this value to 0.
 #task_estimation_threshold=30000
 
-# 'use_magicfile' specifies if the 'file --mime-type <filename>' command should
-# be used to guess content types instead of the default filename extension-based
+# 'use_magicfile' specifies if the 'file --mime <filename>' command should be
+# used to guess content types instead of the default filename extension-based
 # mechanism. Available on UNIX and MacOS (and possibly on Windows, if you're
 # running Cygwin or some other package that provides implementations of
 # UNIX-like commands). When available and enabled use_magicfile should be more
@@ -307,13 +308,6 @@ content_language = en
 # 'default_api_version' specifies the default Google Cloud Storage XML API
 # version to use. If not set below gsutil defaults to API version 1.
 default_api_version = 2
-
-# 'default_project_id' specifies the default Google Cloud Storage project ID to
-# use with the 'mb' and 'ls' commands. This default can be overridden by
-# specifying the -p option to the 'mb' and 'ls' commands.
-#default_project_id =
-
-
 
 [OAuth2]
 # This section specifies options used with OAuth2 authentication.

@@ -15,4 +15,10 @@ The following environment variables are expected for AWS
 * `AWS_SECRET_ACCESS_KEY`
 * `AWS_SESSION_TOKEN` (only when using temporary credentials)
 
+## GCP Credentials
 
+Using a service account
+
+```
+docker run --rm -it -v ${HOME}/Downloads/test-XXXX.json:/application_default_credentials.json -e GOOGLE_APPLICATION_CREDENTIALS=/application_default_credentials.json panubo/gsutil:latest
+```
