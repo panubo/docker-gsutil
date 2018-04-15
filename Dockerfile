@@ -9,7 +9,7 @@ ENV \
   GOMPLATE_CHECKSUM=0e09e7cd6fb5e96858255a27080570624f72910e66be5152b77a2fd21d438dd7
 
 RUN set -x \
-  && apk --no-cache add python bash curl ca-certificates tar make py-crcmod \
+  && apk --no-cache add python bash curl ca-certificates tar make py-crcmod lz4 xz bzip2 \
   ;
 
 RUN set -x \
