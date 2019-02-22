@@ -1,4 +1,5 @@
 TAG        := latest
+VERSION    := $(shell sed -E -e '/GSUTIL_VERSION[ |=]/!d' -e 's/.*GSUTIL_VERSION[ |=|v]+([0-9\.]+).*/\1/' Dockerfile)
 IMAGE_NAME := panubo/gsutil
 REGISTRY   := docker.io
 
@@ -18,6 +19,12 @@ bash-aws:
 test: build
 	docker run --rm -it --env-file test.env ${IMAGE_NAME}:${TAG} diff -u /home/user/.boto.tmpl /home/user/.boto
 
-push:
+publish: REVISION_CURRENT ?= $(shell skopeo inspect docker://docker.io/panubo/gsutil | jq -r '.RepoTags[]' | sort | grep "4.36" | tail -n1 | sed -E 's/.*-([0-9]+)/\1/')
+publish: REVISION ?= $(shell echo $$(($(REVISION_CURRENT) + 1)))
+publish:
 	docker tag ${IMAGE_NAME}:${TAG} ${REGISTRY}/${IMAGE_NAME}:${TAG}
+	docker tag ${IMAGE_NAME}:${TAG} ${REGISTRY}/${IMAGE_NAME}:${VERSION}-${REVISION}
+	docker tag ${IMAGE_NAME}:${TAG} ${REGISTRY}/${IMAGE_NAME}:${VERSION}
 	docker push ${REGISTRY}/${IMAGE_NAME}:${TAG}
+	docker push ${REGISTRY}/${IMAGE_NAME}:${VERSION}-${REVISION}
+	docker push ${REGISTRY}/${IMAGE_NAME}:${VERSION}

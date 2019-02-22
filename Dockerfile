@@ -20,6 +20,7 @@ RUN set -x \
   && tar -C /opt -zxf /tmp/gsutil_${GSUTIL_VERSION}.tar.gz \
   && ln -s /opt/gsutil/gsutil /usr/local/bin/gsutil \
   && rm -f /tmp/* \
+  && find /opt ! -group 0 -exec chgrp -h 0 {} \; \
   ;
 
 RUN set -x \
@@ -38,8 +39,7 @@ COPY boto.tmpl /.boto.tmpl
 
 # Stop running as root
 RUN set -x \
-  && adduser -u 1000 -D user \
+  && adduser -u 1000 -D gsutil \
   && adduser -u 1001 -D jenkins \
   ;
-USER user
-
+USER gsutil
