@@ -1,4 +1,4 @@
-FROM docker.io/alpine:3.7
+FROM docker.io/alpine:3.11
 
 ENV \
   GSUTIL_VERSION=4.46 \
