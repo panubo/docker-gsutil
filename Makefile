@@ -1,12 +1,13 @@
-TAG        := latest
-VERSION    := $(shell sed -E -e '/GSUTIL_VERSION[ |=]/!d' -e 's/.*GSUTIL_VERSION[ |=|v]+([0-9\.]+).*/\1/' Dockerfile)
-IMAGE_NAME := panubo/gsutil
-REGISTRY   := docker.io
+NAME := gsutil
+TAG := latest
+IMAGE_NAME := panubo/$(NAME)
 
 AWS_DEFAULT_REGION := ap-southeast-2
 
-build:
-	docker build -t ${IMAGE_NAME}:${TAG} .
+.PHONY: help bash bash-aws test build push clean
+
+help:
+	@printf "$$(grep -hE '^\S+:.*##' $(MAKEFILE_LIST) | sed -e 's/:.*##\s*/:/' -e 's/^\(.\+\):\(.*\)/\\x1b[36m\1\\x1b[m:\2/' | column -c2 -t -s :)\n"
 
 bash:
 	docker run --rm -it ${IMAGE_NAME}:${TAG}
@@ -19,12 +20,11 @@ bash-aws:
 test: build
 	docker run --rm -it --env-file test.env ${IMAGE_NAME}:${TAG} diff -u /home/user/.boto.tmpl /home/user/.boto
 
-publish: REVISION_CURRENT ?= $(shell skopeo inspect docker://docker.io/panubo/gsutil | jq -r '.RepoTags[]' | sort | grep "4.36" | tail -n1 | sed -E 's/.*-([0-9]+)/\1/')
-publish: REVISION ?= $(shell echo $$(($(REVISION_CURRENT) + 1)))
-publish:
-	docker tag ${IMAGE_NAME}:${TAG} ${REGISTRY}/${IMAGE_NAME}:${TAG}
-	docker tag ${IMAGE_NAME}:${TAG} ${REGISTRY}/${IMAGE_NAME}:${VERSION}-${REVISION}
-	docker tag ${IMAGE_NAME}:${TAG} ${REGISTRY}/${IMAGE_NAME}:${VERSION}
-	docker push ${REGISTRY}/${IMAGE_NAME}:${TAG}
-	docker push ${REGISTRY}/${IMAGE_NAME}:${VERSION}-${REVISION}
-	docker push ${REGISTRY}/${IMAGE_NAME}:${VERSION}
+build: ## Builds docker image latest
+	docker build --pull -t $(IMAGE_NAME):$(TAG) .
+
+push: ## Pushes the docker image to hub.docker.com
+	docker push $(IMAGE_NAME):$(TAG)
+
+clean: ## Remove built image
+	docker rmi $(IMAGE_NAME):$(TAG)
